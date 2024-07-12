@@ -9,15 +9,16 @@ services:
       - POSTGRES_DB=postgres
     restart: always             # run as a service
     volumes:
+        - odoo-db-data:/var/lib/postgresql/data
         - ./postgresql:/var/lib/postgresql/data
-    #networks:
-    #  - proxy
+    networks:
+      - odoo17
 
   odoo:
     #image: odoo:17
     build:
       context: .
-      dockerfile: Dockerfile
+    image: mahdiharzallah/odoo17-single-node:latest
     user: root
     depends_on:
       - db
@@ -32,17 +33,17 @@ services:
       - HOST=db
       - USER=odoo
       - PASSWORD=odoo17@2023
-    #volumes:
-      #- odoo-web-data:/var/lib/odoo
+    volumes:
+      - odoo-web-data:/var/lib/odoo
       #- /etc/timezone:/etc/timezone:ro
       #- /etc/localtime:/etc/localtime:ro
       #- ./entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
       #- ./addons:/mnt/extra-addons
       #- ./etc:/etc/odoo
     restart: always             # run as a service
-    #networks:
-    #  - proxy
-    labels:
+    networks:
+      - odoo17
+    #labels:
       #- "traefik.enable=true"
       #- "traefik.http.routers.odoo.entrypoints=http"
       # NOW YOU NEED TO SETUP A DOMAIN OR SUB DOAMIN DNS WITH YOUR IP AND WRITE IT BELOW : 
@@ -57,6 +58,11 @@ services:
       #- "traefik.http.services.odoo.loadbalancer.server.port=8069"
       #- "traefik.http.middlewares.odoo-secure-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
       #- "traefik.docker.network=proxy"
-#networks:
-#  proxy:
-#    external: true
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+networks:
+  odoo17:
+    driver: bridge
+  #proxy:
+    #external: true
